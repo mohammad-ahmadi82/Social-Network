@@ -2,8 +2,20 @@
     <div class="container-fluid">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{% url 'home:home' %}">Home</a>
+            <a class="nav-link active" href="{% url 'home:home' %}">Home</a>
           </li> 
+          {% if request.user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'account:logout' %}">logout</a>
+          </li> 
+          {% else %}
+          <li class="nav-item">
+            <a class="nav-link active"  href="{% url 'account:register' %}">Register</a> 
+          </li> 
+          <li class="nav-item">
+            <a class="nav-link active"  href="{% url 'account:login' %}">Login</a> 
+          </li> 
+          {% endif %}
         </ul>
     </div>
   </nav>
