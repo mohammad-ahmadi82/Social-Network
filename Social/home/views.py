@@ -17,7 +17,6 @@ class PostDetailView(View):
         post = get_object_or_404(Post, pk=post_id, slug=post_slug)
         return render(request, 'home/detail.html', {'post':post})
 
-
 class PostDeleteView(LoginRequiredMixin, View):
     def get(self, request, post_id):
         post = get_object_or_404(Post, pk=post_id)
@@ -28,7 +27,6 @@ class PostDeleteView(LoginRequiredMixin, View):
         else:
             messages.error(request, 'You cant delete this post', 'danger')
             return redirect('home:home')
-
 
 class PostUpdateView(LoginRequiredMixin, View):
     form_class  = PostCreateUpdateForm
@@ -58,7 +56,6 @@ class PostUpdateView(LoginRequiredMixin, View):
             new_post.save()
             messages.success(request, 'Your post updated successfully')
             return redirect('home:post_detail', post.id, post.slug)
-
 
 class PostCreateView(LoginRequiredMixin, View):
     form_class  = PostCreateUpdateForm
