@@ -12,6 +12,38 @@
 
 <p> <a href="{% url 'account:profile' post.user.id %}">{{ post.user.username }}</a> - {{ post.updated|date:"Y - M" }}</p>
 
-<p> {{post.body}} </p>
+<p> {{post.body}} </p><hr/>
+
+    {% if request.user.is_authenticated %}
+    <form action="" method="post"> 
+        {% csrf_token %}
+        {{ form.as_p }}
+    <input type="submit" value="Send">
+    </form> <br/>
+    {% else %}
+    <p class='alert alert-danger'> only logged in user can comment !</p>
+
+    {% endif %}
+
+
+    {% comment %} <p> {{comments.count}} comments </p> {% endcomment %}
+    {% for comment in comments %}
+    <div class='card bg-dark text-white' >
+        <p class='card-header'> {{ comment.user }} | {{ comment.created|timesince }}</p>
+        <p class='card-body'> {{ comment.body }} </p>
+        {% with replies=comment.rcomments.all %}
+        {% for  reply in replies %}
+        <p class="bg-primary p-3 m-2"> {{reply.user}} <br/> {{reply.body}} </p>
+        {% endfor %}
+        {% endwith %}
+    </div> <br/>
+    {% empty %}
+    <p> no comments yet! </p>
+
+    {% endfor %}
+
+
+
+
 
 {% endblock content %}

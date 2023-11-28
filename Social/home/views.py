@@ -4,8 +4,10 @@ from django.views       import View
 from .models            import Post
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib     import messages
-from .forms             import PostCreateUpdateForm
+from .forms             import PostCreateUpdateForm, CommentCreateForm
 from django.utils.text  import slugify
+from django.contrib.auth.decorators import login_required
+from django .utils.decorators       import method_decorator
 
 class HomeView(View):
     def get(self, request):
@@ -13,9 +15,26 @@ class HomeView(View):
         return render(request, 'home/index.html', {'posts':posts})
 
 class PostDetailView(View):
-    def get(self, request, post_id, post_slug):
-        post = get_object_or_404(Post, pk=post_id, slug=post_slug)
-        return render(request, 'home/detail.html', {'post':post})
+    form_class  = CommentCreateForm
+
+    def setup(self, request, *args, **kwargs):
+        self.post_instance = get_object_or_404(Post, pk=kwargs['post_id'], slug=kwargs['post_slug'])
+        return super().setup(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        comment    = self.post_instance.pcomments.filter(is_reply=False)
+        return render(request, 'home/detail.html', {'post':self.post_instance, 'comments':comment, 'form':self.form_class})
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid:
+            new_comment         = form.save(commit=False)
+            new_comment.user    = request.user
+            new_comment.post    = self.post_instance
+            new_comment.save()
+            messages.success(request, 'your comment submitted successfully', 'success')
+            return redirect('home:detail', self.post_instance.id, self.post_instance.slug)
 
 class PostDeleteView(LoginRequiredMixin, View):
     def get(self, request, post_id):
@@ -28,7 +47,7 @@ class PostDeleteView(LoginRequiredMixin, View):
             messages.error(request, 'You cant delete this post', 'danger')
             return redirect('home:home')
 
-class PostUpdateView(LoginRequiredMixin, View):
+class PostUpdateView(LoginRequiredMixin, View): 
     form_class  = PostCreateUpdateForm
 
     def setup(self, request, *args, **kwargs):
