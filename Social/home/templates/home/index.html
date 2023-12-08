@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <p> index page </p>
+
+
+<form action="" method="get"> 
+  {{ form.as_p }}
+<input type="submit" value="Search">
+</form> </br> </br>
 
       <div class='card'>
         {% for post in posts %}
